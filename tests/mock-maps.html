@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<!-- Imitação mínima do HTML do Google Maps (mesmos seletores do site real em nov/2026),
+     para testar a extensão sem internet: python3 tests/e2e.py -->
+<head><meta charset="utf-8"><title>Google Maps (teste)</title>
+<style>
+  body { margin: 0; font: 14px Arial, sans-serif; display: flex; height: 100vh; }
+  #side { width: 400px; display: flex; flex-direction: column; border-right: 1px solid #ddd; }
+  div[role="feed"] { overflow-y: auto; flex: 1; }
+  .Nv2PK { padding: 12px; border-bottom: 1px solid #eee; position: relative; }
+  .hfpxzc { position: absolute; inset: 0; }
+  #map { flex: 1; background: repeating-linear-gradient(45deg, #e8eef3, #e8eef3 20px, #dfe7ee 20px, #dfe7ee 40px); }
+</style></head>
+<body>
+<div id="side"><button jsaction="omnibox.back; mouseover:omnibox.showTooltip" aria-label="Voltar">←</button><div id="pane"></div></div>
+<div id="map"></div>
+<script>
+(() => {
+  /* catálogo determinístico: cada busca devolve lugares da "cidade" perto do centro pedido */
+  const path = decodeURIComponent(location.pathname);
+  const m = /\/maps\/search\/([^/]+)(?:\/@(-?[\d.]+),(-?[\d.]+),(\d+)z)?/.exec(path);
+  const q = m ? m[1].replace(/\+/g, ' ') : '';
+  const at = m && m[2] ? { lat: +m[2], lng: +m[3] } : { lat: -20.30, lng: -40.32 };
+  const N = 400; /* cidade com 400 barbearias */
+  const all = [];
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < N; i++) {
+    const lat = -20.30 + (rnd() - .5) * 0.24, lng = -40.32 + (rnd() - .5) * 0.24;
+    const kind = i % 5;
+    all.push({ i, nome: (i === 3 ? 'Barbearia "Fechou"' : 'Barbearia ' + (i + 1)), id: '0x' + (1000 + i).toString(16) + ':0x' + (900000 + i * 7).toString(16), lat, lng,
+      nota: (3.5 + (i % 16) / 10).toFixed(1).replace('.', ','), aval: (i * 37) % 900,
+      tel: i % 7 === 0 ? '' : (i % 2 ? '0279' + String(91000000 + i).slice(0, 8) : '02732' + String(220000 + i).slice(0, 6)),
+      site: kind === 0 ? '' : kind === 1 ? 'https://www.instagram.com/barbearia' + i + '/' : kind === 2 ? 'https://www.trinks.com/b' + i : 'https://www.google.com/url?q=https://barbearia' + i + '.com.br/&opi=1',
+      fechado: i === 3, bairro: ['Centro', 'Praia do Canto', 'Jardim Camburi', 'Santa Lúcia'][i % 4] });
+  }
+  if (/^único/.test(q)) {
+    const p = all[10];
+    document.getElementById('pane').innerHTML = detail(p);
+    history.replaceState(null, '', '/maps/place/' + encodeURIComponent(p.nome) + '/@' + p.lat + ',' + p.lng + ',17z');
+    return;
+  }
+  const list = all.filter((p) => Math.abs(p.lat - at.lat) < 0.05 && Math.abs(p.lng - at.lng) < 0.05)
+    .sort((a, b) => Math.hypot(a.lat - at.lat, a.lng - at.lng) - Math.hypot(b.lat - at.lat, b.lng - at.lng));
+  const CAP = /em /.test(q) ? 60 : 40; /* o Maps para em ~60/120 resultados por busca */
+  const items = list.slice(0, CAP);
+  let shown = 7;
+  if (!m[2]) history.replaceState(null, '', location.pathname + '/@-20.301789,-40.3214876,14z' + location.search);
+  function card(p) {
+    const tel = p.tel && p.i % 3 === 0 ? ' · (27) 9' + p.tel.slice(-8, -4) + '-' + p.tel.slice(-4) : '';
+    return '<div role="article" class="Nv2PK THOPZb CpccDe"><a class="hfpxzc" aria-label="' + p.nome.replace(/"/g, '&quot;') + '" href="https://www.google.com/maps/place/' + encodeURIComponent(p.nome) + '/data=!4m7!3m6!1s' + p.id + '!8m2!3d' + p.lat.toFixed(6) + '!4d' + p.lng.toFixed(6) + '!16s?authuser=0&amp;hl=pt-BR"></a>' +
+      '<div class="qBF1Pd">' + p.nome + '</div><div>' + p.nome + '</div>' +
+      '<span role="img" aria-label="' + p.nota + ' estrelas ' + p.aval + ' comentários">' + p.nota + '(' + p.aval + ')</span>' +
+      '<div>Barbearia ·  · R. Teste, ' + (p.i + 10) + '</div><div>' + (p.fechado ? 'Fechado permanentemente' : 'Aberto · Fecha 22:00' + tel) + '</div>' +
+      (p.i % 11 === 0 ? '<a href="https://www.google.com/aclk?sa=L&amp;adurl=">Patrocinado</a>' : '') + '</div>';
+  }
+  function feed() {
+    const end = shown >= items.length ? '<div><span class="HlvSq">Você chegou ao final da lista.</span></div>' : '';
+    return '<div role="feed" aria-label="Resultados para ' + q + '">' + items.slice(0, shown).map(card).join('') + end + '</div>';
+  }
+  function detail(p) {
+    return '<div role="main" aria-label="' + p.nome.replace(/"/g, '&quot;') + '"><h1>' + p.nome + '</h1>' +
+      '<div class="F7nice"><span>' + p.nota + '</span><span>(' + p.aval + ')</span></div>' +
+      '<button jsaction="pane.rating.category">Barbearia</button>' + (p.fechado ? '<span>Fechado permanentemente</span>' : '') +
+      '<button data-item-id="address" aria-label="Endereço: R. Teste, ' + (p.i + 10) + ' - ' + p.bairro + ', Vitória - ES, 29015-100 ">R. Teste</button>' +
+      (p.site ? '<a data-item-id="authority" aria-label="Website: x" href="' + p.site + '">site</a>' : '') +
+      (p.tel ? '<button data-item-id="phone:tel:' + p.tel + '" aria-label="Telefone: x">tel</button>' : '') +
+      (p.i % 6 === 0 ? '<a>Reivindicar esta empresa</a>' : '') + '</div>';
+  }
+  const pane = document.getElementById('pane');
+  let open = null, scroll = 0;
+  function renderFeed() {
+    pane.innerHTML = feed();
+    const f = pane.querySelector('[role=feed]'); f.style.height = (innerHeight - 30) + 'px'; f.scrollTop = scroll;
+    f.addEventListener('scroll', () => { scroll = f.scrollTop; if (f.scrollTop + f.clientHeight >= f.scrollHeight - 5 && shown < items.length && !f.dataset.loading) {
+      f.dataset.loading = 1; setTimeout(() => { shown = Math.min(items.length, shown + 10); renderFeed(); }, 350); } });
+    f.addEventListener('click', (e) => { const a = e.target.closest('a.hfpxzc'); if (!a) return; e.preventDefault();
+      const p = items.find((x) => a.href.includes(x.id)); open = p;
+      setTimeout(() => { pane.innerHTML = detail(p); }, 200 + Math.random() * 300); });
+  }
+  document.querySelector('[jsaction^="omnibox.back"]').addEventListener('click', () => { if (open) { open = null; setTimeout(renderFeed, 150); } });
+  setTimeout(renderFeed, 600);
+})();
+</script>
+</body>
+</html>

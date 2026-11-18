@@ -1,0 +1,10 @@
+dist/
+node_modules/
+prints/
+*.zip
+*.crx
+*.pem
+__pycache__/
+.DS_Store
+Thumbs.db
+PUBLICAR-NO-GITHUB.cmd

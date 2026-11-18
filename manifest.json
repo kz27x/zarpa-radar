@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Zarpa Radar — leads do Google Maps",
+  "short_name": "Zarpa Radar",
+  "description": "Digite o nicho e a cidade: o Radar varre o Google Maps e entrega telefone, WhatsApp, site e nota de cada negócio, em planilha.",
+  "version": "1.0.0",
+  "minimum_chrome_version": "111",
+  "icons": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
+  "action": {
+    "default_title": "Zarpa Radar",
+    "default_popup": "popup/popup.html",
+    "default_icon": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png" }
+  },
+  "background": { "service_worker": "background.js" },
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["https://www.google.com/maps*", "https://www.google.com.br/maps*", "https://maps.google.com/*"],
+      "js": ["content/core.js", "content/scanner.js", "content/panel.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    { "resources": ["icons/pix-qr.png"], "matches": ["https://www.google.com/*", "https://www.google.com.br/*", "https://maps.google.com/*"] }
+  ],
+  "commands": {
+    "toggle-radar": { "suggested_key": { "default": "Alt+Shift+R" }, "description": "Abrir ou fechar o painel do Radar no Google Maps" }
+  }
+}

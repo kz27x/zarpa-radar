@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Zarpa Radar</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="top">
+    <img class="mark" src="../icons/icon48.png" width="34" height="34" alt="">
+    <div class="brand">
+      <strong>Zarpa Radar</strong>
+      <span>Leads do Google Maps, na hora</span>
+    </div>
+    <button id="heart" class="heart" type="button" title="Apoiar o projeto" aria-label="Apoiar o projeto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
+  </header>
+
+  <main id="home">
+    <button id="open" class="btn primary big" type="button">Abrir o Radar no Google Maps</button>
+    <ol class="how">
+      <li><b>Escreva o nicho</b> <span>barbearia, dentista, pet shop…</span></li>
+      <li><b>Diga a cidade</b> <span>ou deixe vazio para usar a área do mapa</span></li>
+      <li><b>Baixe a planilha</b> <span>telefone, WhatsApp, site e nota de cada um</span></li>
+    </ol>
+    <div id="last" class="last" hidden></div>
+    <p class="hint">Atalho: <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> dentro do Maps.</p>
+  </main>
+
+  <section id="donate" class="donate" hidden>
+    <img class="qr" src="../icons/pix-qr.png" width="200" height="200" alt="QR Code Pix para doação">
+    <p class="lead">O Zarpa Radar é grátis e de código aberto. Ajudou a fechar cliente? Pague um café pro dev ☕ (valor livre, no Pix).</p>
+    <div class="pixkey"><span class="label">Chave Pix</span><code id="pixKey"></code></div>
+    <button id="copyPix" class="btn primary" type="button">Copiar Pix copia e cola</button>
+    <button id="back" class="btn" type="button">Voltar</button>
+  </section>
+
+  <footer class="foot">
+    <a id="by" class="by" target="_blank" rel="noopener">Feito pela <b>Zarpa</b></a>
+    <a id="ig" target="_blank" rel="noopener">@zarpa.dev</a>
+    <a id="gh" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+
+  <script src="../content/core.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
